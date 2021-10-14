@@ -35,5 +35,6 @@ func (arh AgentRestHandler) allocateAgent(c echo.Context) error {
 	if err != nil {
 
 	}
+
 	return nil
 }
