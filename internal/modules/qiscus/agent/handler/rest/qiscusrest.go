@@ -1,4 +1,4 @@
 package rest
 
-type QiscusRestHandler struct {
+type AgentRestHandler struct {
 }
