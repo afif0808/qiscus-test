@@ -25,5 +25,15 @@ func (arh AgentRestHandler) Mount(root *echo.Group) {
 }
 
 func (arh AgentRestHandler) allocateAgent(c echo.Context) error {
+	var payload payloads.AgentAllocationPayload
+	err := c.Bind(&payload)
+	if err != nil {
+
+	}
+	ctx := c.Request().Context()
+	err = arh.uc.AllocateAgent(ctx, payload)
+	if err != nil {
+
+	}
 	return nil
 }
