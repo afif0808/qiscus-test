@@ -1,4 +1,6 @@
 package domains
 
-type QiscusRoom struct {
+type QiscusActiveRoom struct {
+	RoomID  int64
+	AgentID int64
 }
