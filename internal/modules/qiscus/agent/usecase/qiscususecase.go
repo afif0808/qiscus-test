@@ -2,57 +2,75 @@ package usecase
 
 import (
 	"context"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 
+	"github.com/afif0808/qiscus-test/internal/domains"
 	"github.com/afif0808/qiscus-test/internal/payloads"
 )
 
-type roomRepository interface {
-	AddRoom(ctx context.Context)
-	GetAgentRooms()
-}
-
-type customerQueueRepository interface {
-	DequeueCustomer(ctx context.Context)
-	EnqueueCustomer(ctx context.Context)
-}
-
 type repository interface {
-	roomRepository
-	customerQueueRepository
+	AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error
+	EnqueueRoom(ctx context.Context, roomID int64) error
+	GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error)
 }
 
 type AgentUsecase struct {
-	repo              repository
-	allocationChannel chan struct {
-		ctx context.Context
-		p   payloads.AgentAllocationPayload
-	}
+	repo repository
 }
 
 func NewAgentUsecase(repo repository) AgentUsecase {
 	uc := AgentUsecase{
 		repo: repo,
-		allocationChannel: make(chan struct {
-			ctx context.Context
-			p   payloads.AgentAllocationPayload
-		}),
 	}
-	go func() { uc.allocateAgent() }()
 
 	return uc
 }
 
-func (auc AgentUsecase) AllocateAgent(ctx context.Context, p payloads.AgentAllocationPayload) error {
-	auc.allocationChannel <- struct {
-		ctx context.Context
-		p   payloads.AgentAllocationPayload
-	}{
-		ctx: ctx, p: p,
+func (auc AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAgentAllocation) error {
+	// Check if agent is available
+	// If available assign to the given room
+	// Otherwise add to room queue
+
+	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
+	if err != nil {
+		return err
 	}
-	return nil
+
+	if len(rooms) >= 2 {
+		auc.repo.EnqueueRoom(ctx, p.RoomID)
+		return nil
+	}
+	err = auc.assignAgent(ctx, payloads.QiscusAgentAssignment{
+		RoomID:  p.RoomID,
+		AgentID: p.Candidate.ID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return auc.repo.AddActiveRoom(ctx, domains.QiscusActiveRoom{
+		AgentID: p.Candidate.ID,
+		RoomID:  p.RoomID,
+	})
 }
 
-func (auc AgentUsecase) allocateAgent() error {
+func (auc AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
+	c := http.Client{}
+	body := url.Values{}
+	body.Add("room_id", strconv.FormatInt(p.RoomID, 10))
+	body.Add("agent_id", strconv.FormatInt(p.AgentID, 10))
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "", strings.NewReader(body.Encode()))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	c.Do(req)
 
 	return nil
 }

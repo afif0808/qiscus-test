@@ -8,7 +8,7 @@ import (
 )
 
 type usecase interface {
-	AllocateAgent(context.Context, payloads.AgentAllocationPayload) error
+	AllocateAgent(context.Context, payloads.QiscusAgentAllocation) error
 }
 
 type AgentRestHandler struct {
@@ -25,7 +25,7 @@ func (arh AgentRestHandler) Mount(root *echo.Group) {
 }
 
 func (arh AgentRestHandler) allocateAgent(c echo.Context) error {
-	var payload payloads.AgentAllocationPayload
+	var payload payloads.QiscusAgentAllocation
 	err := c.Bind(&payload)
 	if err != nil {
 
