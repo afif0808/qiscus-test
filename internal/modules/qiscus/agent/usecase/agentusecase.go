@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -65,12 +66,17 @@ func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgent
 	body.Add("room_id", strconv.FormatInt(p.RoomID, 10))
 	body.Add("agent_id", strconv.FormatInt(p.AgentID, 10))
 
-	req, err := http.NewRequestWithContext(ctx, "POST", "", strings.NewReader(body.Encode()))
+	url := os.Getenv("QISCUS_API_BASE_URL") + "/api/v1/admin/service/assign_agent"
+
+	req, err := http.NewRequestWithContext(ctx, "POST", url, strings.NewReader(body.Encode()))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Qiscus-App-Id", os.Getenv("QISCUS_APP_ID"))
+	req.Header.Set("Qiscus-Secret-Key", os.Getenv("QISCUS_SECREY_KEY"))
+
 	resp, err := c.Do(req)
 	if err != nil {
 		return err
