@@ -45,7 +45,7 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 		auc.repo.EnqueueRoom(ctx, p.RoomID)
 		return nil
 	}
-	err = auc.assignAgent(ctx, payloads.QiscusAgentAssignment{
+	err = auc.AssignAgent(ctx, payloads.QiscusAgentAssignment{
 		RoomID:  p.RoomID,
 		AgentID: p.Candidate.ID,
 	})
@@ -60,7 +60,7 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	})
 }
 
-func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
+func (auc *AgentUsecase) AssignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
 	c := http.Client{}
 	body := url.Values{}
 	body.Add("room_id", p.RoomID)
