@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -29,7 +30,7 @@ func NewAgentUsecase(repo repository) AgentUsecase {
 	return uc
 }
 
-func (auc AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAgentAllocation) error {
+func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAgentAllocation) error {
 	// Check if agent is available
 	// If available assign to the given room
 	// Otherwise add to room queue
@@ -58,7 +59,7 @@ func (auc AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAgen
 	})
 }
 
-func (auc AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
+func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
 	c := http.Client{}
 	body := url.Values{}
 	body.Add("room_id", strconv.FormatInt(p.RoomID, 10))
@@ -70,7 +71,13 @@ func (auc AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentA
 	}
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	c.Do(req)
+	resp, err := c.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode >= 400 {
+		return errors.New("error occured")
+	}
 
 	return nil
 }
