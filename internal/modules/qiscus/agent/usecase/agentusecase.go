@@ -36,6 +36,12 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	// Check if agent is available
 	// If available assign to the given room
 	// Otherwise add to room queue
+
+	if p.Candidate == nil {
+		auc.repo.EnqueueRoom(ctx, p.RoomID)
+		return nil
+	}
+
 	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
 	if err != nil {
 		return err
@@ -45,22 +51,26 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 		auc.repo.EnqueueRoom(ctx, p.RoomID)
 		return nil
 	}
-	err = auc.AssignAgent(ctx, payloads.QiscusAgentAssignment{
+
+	return auc.AssignAgent(ctx, payloads.QiscusAgentAssignment{
 		RoomID:  p.RoomID,
 		AgentID: p.Candidate.ID,
 	})
 
-	if err != nil {
-		return err
-	}
-
-	return auc.repo.AddActiveRoom(ctx, domains.QiscusActiveRoom{
-		AgentID: p.Candidate.ID,
-		RoomID:  p.RoomID,
-	})
 }
 
 func (auc *AgentUsecase) AssignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
+	err := auc.assignAgent(ctx, p)
+	if err != nil {
+		return err
+	}
+	return auc.repo.AddActiveRoom(ctx, domains.QiscusActiveRoom{
+		RoomID:  p.RoomID,
+		AgentID: p.AgentID,
+	})
+}
+
+func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
 	c := http.Client{}
 	body := url.Values{}
 	body.Add("room_id", p.RoomID)
