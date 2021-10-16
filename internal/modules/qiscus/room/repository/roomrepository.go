@@ -6,19 +6,27 @@ import (
 	"github.com/afif0808/qiscus-test/internal/domains"
 )
 
-type RoomRepository struct {
+type ActiveRoomRepository struct {
 }
 
-func NewRoomRepository() RoomRepository {
-	return RoomRepository{}
+func NewActiveRoomRepository() ActiveRoomRepository {
+	return ActiveRoomRepository{}
 }
 
-func (rr *RoomRepository) AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error {
+func (repo *ActiveRoomRepository) AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error {
+
 	return nil
 }
-func (rr *RoomRepository) EnqueueRoom(ctx context.Context, roomID string) error {
-	return nil
-}
-func (rr *RoomRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error) {
+func (repo *ActiveRoomRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error) {
 	return nil, nil
+}
+
+type RoomQueueRepository struct {
+}
+
+func NewRoomQueueRepository() RoomQueueRepository {
+	return RoomQueueRepository{}
+}
+func (repo *RoomQueueRepository) EnqueueRoom(ctx context.Context, roomID string) error {
+	return nil
 }
