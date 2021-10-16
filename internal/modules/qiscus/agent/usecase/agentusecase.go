@@ -36,11 +36,6 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	// Check if agent is available
 	// If available assign to the given room
 	// Otherwise add to room queue
-
-	if p.Candidate == nil {
-		return nil
-	}
-
 	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
 	if err != nil {
 		return err
