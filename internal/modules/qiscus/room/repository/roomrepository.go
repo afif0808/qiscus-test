@@ -16,7 +16,7 @@ func NewRoomRepository() RoomRepository {
 func (rr *RoomRepository) AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error {
 	return nil
 }
-func (rr *RoomRepository) EnqueueRoom(ctx context.Context, roomID int64) error {
+func (rr *RoomRepository) EnqueueRoom(ctx context.Context, roomID string) error {
 	return nil
 }
 func (rr *RoomRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error) {

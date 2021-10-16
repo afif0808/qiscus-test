@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	agemtmodule "github.com/afif0808/qiscus-test/internal/modules/qiscus/agent"
 	"github.com/joho/godotenv"
@@ -17,13 +16,14 @@ func main() {
 	}
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
+		log.Println("Nande?")
 		return c.JSON(http.StatusOK, struct {
 			Message string `json:"message"`
 		}{Message: "Hello World"})
 	})
 	agemtmodule.InjectAgentModule(e)
 
-	port := os.Getenv("PORT")
+	port := "43301"
 	e.Start(":" + port)
 
 }

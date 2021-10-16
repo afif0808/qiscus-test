@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -15,7 +16,7 @@ import (
 
 type repository interface {
 	AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error
-	EnqueueRoom(ctx context.Context, roomID int64) error
+	EnqueueRoom(ctx context.Context, roomID string) error
 	GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error)
 }
 
@@ -35,6 +36,10 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	// Check if agent is available
 	// If available assign to the given room
 	// Otherwise add to room queue
+
+	if p.Candidate == nil {
+		return nil
+	}
 
 	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
 	if err != nil {
@@ -63,7 +68,7 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgentAssignment) error {
 	c := http.Client{}
 	body := url.Values{}
-	body.Add("room_id", strconv.FormatInt(p.RoomID, 10))
+	body.Add("room_id", p.RoomID)
 	body.Add("agent_id", strconv.FormatInt(p.AgentID, 10))
 
 	url := os.Getenv("QISCUS_API_BASE_URL") + "/api/v1/admin/service/assign_agent"
@@ -75,12 +80,17 @@ func (auc *AgentUsecase) assignAgent(ctx context.Context, p payloads.QiscusAgent
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Qiscus-App-Id", os.Getenv("QISCUS_APP_ID"))
-	req.Header.Set("Qiscus-Secret-Key", os.Getenv("QISCUS_SECREY_KEY"))
+	req.Header.Set("Qiscus-Secret-Key", os.Getenv("QISCUS_SECRET_KEY"))
 
 	resp, err := c.Do(req)
 	if err != nil {
 		return err
 	}
+	mappedResp := map[string]interface{}{}
+
+	json.NewDecoder(resp.Body).Decode(&mappedResp)
+	json.NewEncoder(os.Stdout).Encode(mappedResp)
+
 	if resp.StatusCode >= 400 {
 		return errors.New("error occured")
 	}

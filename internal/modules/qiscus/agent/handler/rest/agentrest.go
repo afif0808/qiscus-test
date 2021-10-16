@@ -2,6 +2,8 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
+	"log"
 
 	"github.com/afif0808/qiscus-test/internal/payloads"
 	"github.com/labstack/echo/v4"
@@ -26,10 +28,14 @@ func (arh AgentRestHandler) Mount(root *echo.Group) {
 
 func (arh AgentRestHandler) allocateAgent(c echo.Context) error {
 	var payload payloads.QiscusAgentAllocation
-	err := c.Bind(&payload)
+	err := json.NewDecoder(c.Request().Body).Decode(&payload)
+
 	if err != nil {
+		log.Println(err)
 
 	}
+	log.Println(payload)
+
 	ctx := c.Request().Context()
 	err = arh.uc.AllocateAgent(ctx, payload)
 	if err != nil {
