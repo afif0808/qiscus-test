@@ -14,8 +14,8 @@ func InjectAgentModule(e *echo.Echo) {
 		roomrepository.ActiveRoomRepository
 		roomrepository.RoomQueueRepository
 	}{
-		ActiveRoomRepository: roomrepository.NewActiveRoomRepository(),
-		RoomQueueRepository:  roomrepository.NewRoomQueueRepository(),
+		ActiveRoomRepository: roomrepository.NewActiveRoomRepository(nil),
+		RoomQueueRepository:  roomrepository.NewRoomQueueRepository(nil),
 	}
 
 	usecase := struct {
