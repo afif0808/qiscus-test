@@ -11,11 +11,11 @@ import (
 
 func InjectAgentModule(e *echo.Echo) {
 	repo := struct {
-		roomrepository.ActiveRoomRepository
-		roomrepository.RoomQueueRepository
+		roomrepository.ActiveRoomRedisRepository
+		roomrepository.RoomQueueRedisRepository
 	}{
-		ActiveRoomRepository: roomrepository.NewActiveRoomRepository(nil),
-		RoomQueueRepository:  roomrepository.NewRoomQueueRepository(nil),
+		ActiveRoomRedisRepository: roomrepository.NewActiveRoomRedisRepository(nil),
+		RoomQueueRedisRepository:  roomrepository.NewRoomQueueRedisRepository(nil),
 	}
 
 	usecase := struct {

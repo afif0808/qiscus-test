@@ -16,7 +16,7 @@ func TestAddActiveRoom(t *testing.T) {
 		},
 	}
 
-	repo := NewActiveRoomRepository(&pool)
+	repo := NewActiveRoomRedisRepository(&pool)
 	err := repo.AddActiveRoom(context.Background(), domains.QiscusActiveRoom{
 		RoomID:  "100",
 		AgentID: 100,
@@ -33,7 +33,7 @@ func TestGetActiveRooms(t *testing.T) {
 		},
 	}
 
-	repo := NewActiveRoomRepository(&pool)
+	repo := NewActiveRoomRedisRepository(&pool)
 
 	qars, err := repo.GetAgentActiveRooms(context.Background(), 99)
 	assert.NoError(t, err)
