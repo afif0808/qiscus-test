@@ -57,7 +57,7 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 		return err
 	}
 	isAgentRoomUnlimited := auc.agentRoomCapacity == 0
-	if isAgentRoomUnlimited && len(rooms) >= auc.agentRoomCapacity {
+	if !isAgentRoomUnlimited && len(rooms) >= auc.agentRoomCapacity {
 		auc.repo.EnqueueRoom(ctx, domains.QiscusRoom{
 			ID:      p.RoomID,
 			AgentID: p.Candidate.ID,
