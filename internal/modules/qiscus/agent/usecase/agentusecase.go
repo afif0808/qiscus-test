@@ -35,7 +35,7 @@ func NewAgentUsecase(repo repository) AgentUsecase {
 	if err != nil {
 		log.Panic(err)
 	}
-
+	log.Println("Test")
 	return uc
 }
 
