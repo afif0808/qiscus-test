@@ -23,7 +23,7 @@ func NewRoomRestHandler(uc usecase) RoomRestHandler {
 }
 
 func (rrh RoomRestHandler) Mount(root *echo.Group) {
-	g := root.Group("/room/room/active/")
+	g := root.Group("/room/")
 	g.POST("resolve", rrh.resolveRoom)
 }
 
