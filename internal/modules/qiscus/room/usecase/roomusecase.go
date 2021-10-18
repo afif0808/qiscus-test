@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"sync"
 
 	"github.com/afif0808/qiscus-test/internal/domains"
 	"github.com/afif0808/qiscus-test/internal/payloads"
@@ -21,10 +22,11 @@ type usecases interface {
 type RoomUsecase struct {
 	repo repository
 	ucs  usecases
+	wg   *sync.WaitGroup
 }
 
 func NewRoomUsecase(repo repository, ucs usecases) RoomUsecase {
-	return RoomUsecase{repo: repo, ucs: ucs}
+	return RoomUsecase{repo: repo, ucs: ucs, wg: &sync.WaitGroup{}}
 }
 
 func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) error {
@@ -33,6 +35,8 @@ func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) 
 	// Dequeue room
 	// Check if room is still waiting & unresolved
 	// Assign agent
+	ruc.wg.Wait()
+	ruc.wg.Add(1)
 	qar, err := ruc.repo.GetRoom(ctx, p.Service.RoomID)
 	if err != nil {
 		return err
@@ -46,9 +50,12 @@ func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) 
 		return err
 	}
 
-	return ruc.ucs.AssignAgent(ctx, payloads.QiscusAgentAssignment{
+	err = ruc.ucs.AssignAgent(ctx, payloads.QiscusAgentAssignment{
 		AgentID: qar.AgentID,
 		RoomID:  room.ID,
 	})
 
+	ruc.wg.Done()
+
+	return err
 }
