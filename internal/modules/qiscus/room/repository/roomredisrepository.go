@@ -58,7 +58,7 @@ func (repo *RoomRedisRepository) GetAllRooms(ctx context.Context) ([]domains.Qis
 	return rooms, nil
 }
 
-func (repo *RoomRedisRepository) GetAgentRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error) {
+func (repo *RoomRedisRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error) {
 	allrooms, err := repo.GetAllRooms(ctx)
 	if err != nil {
 		return nil, err

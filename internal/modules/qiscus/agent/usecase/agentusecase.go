@@ -17,7 +17,7 @@ import (
 type repository interface {
 	AddRoom(ctx context.Context, qar domains.QiscusRoom) error
 	EnqueueRoom(ctx context.Context, room domains.QiscusRoom) error
-	GetAgentRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error)
+	GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error)
 }
 
 type AgentUsecase struct {
@@ -45,7 +45,7 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 		return nil
 	}
 
-	rooms, err := auc.repo.GetAgentRooms(ctx, p.Candidate.ID)
+	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
 	if err != nil {
 		return err
 	}

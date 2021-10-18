@@ -35,7 +35,7 @@ func TestGetRooms(t *testing.T) {
 
 	repo := NewRoomRedisRepository(&pool)
 
-	qars, err := repo.GetAgentRooms(context.Background(), 99)
+	qars, err := repo.GetAgentActiveRooms(context.Background(), 99)
 	assert.NoError(t, err)
 	assert.Equal(t, true, len(qars) > 0)
 

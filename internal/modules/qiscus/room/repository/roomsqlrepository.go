@@ -18,10 +18,10 @@ func NewRoomSQLRepository(readDB, writeDB *gorm.DB) RoomSQLRepository {
 
 func (repo *RoomSQLRepository) AddRoom(ctx context.Context, room domains.QiscusRoom) error {
 	room.IsActive = true
-	return repo.writeDB.Save(room).Error
+	return repo.writeDB.Save(&room).Error
 }
 
-func (repo *RoomSQLRepository) GetAgentRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error) {
+func (repo *RoomSQLRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error) {
 	var rooms []domains.QiscusRoom
 	err := repo.readDB.Where("is_active = ?", true).Find(&rooms).Error
 	return rooms, err
@@ -39,7 +39,7 @@ func (repo *RoomSQLRepository) RemoveRoom(ctx context.Context, roomID string) er
 }
 func (repo *RoomSQLRepository) EnqueueRoom(ctx context.Context, room domains.QiscusRoom) error {
 	room.IsActive = false
-	return repo.writeDB.Save(room).Error
+	return repo.writeDB.Save(&room).Error
 }
 func (repo *RoomSQLRepository) DequeueRoom(ctx context.Context) (domains.QiscusRoom, error) {
 	var room domains.QiscusRoom
