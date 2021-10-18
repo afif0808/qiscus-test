@@ -43,5 +43,5 @@ func (arh AgentRestHandler) allocateAgent(c echo.Context) error {
 		return wrapper.NewHTTPResponse(http.StatusInternalServerError, "failed", err).JSON(c.Response())
 	}
 
-	return nil
+	return wrapper.NewHTTPResponse(http.StatusOK, "Agent allocated").JSON(c.Response())
 }

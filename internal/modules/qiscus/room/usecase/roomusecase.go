@@ -2,11 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
-	"net/http"
-	"net/url"
-	"os"
-	"strings"
 
 	"github.com/afif0808/qiscus-test/internal/domains"
 	"github.com/afif0808/qiscus-test/internal/payloads"
@@ -55,30 +50,5 @@ func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) 
 		AgentID: qar.AgentID,
 		RoomID:  room.ID,
 	})
-
-}
-
-func (ruc RoomUsecase) SetResolveRoomWebhookURL(ctx context.Context, webhookURL string) error {
-	c := http.Client{}
-	reqURL := os.Getenv("QISCUS_API_BASE_URL") + "/api/v1/admin/service/assign_agent"
-	body := url.Values{}
-	req, err := http.NewRequestWithContext(ctx, "POST", reqURL, strings.NewReader(body.Encode()))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Qiscus-App-Id", os.Getenv("QISCUS_APP_ID"))
-	req.Header.Set("Authorization", os.Getenv("QISCUS_ADMIN_TOKEN"))
-
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode >= 400 {
-		return errors.New("error happened")
-	}
-
-	return nil
 
 }

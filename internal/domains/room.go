@@ -6,7 +6,7 @@ type QiscusRoom struct {
 	ID        string    `json:"id" gorm:"primaryKey;autoIncrement:false"`
 	AgentID   int64     `json:"agent_id"`
 	IsActive  bool      `json:"is_active"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" gorm:"<-:create"`
 }
 
 type QiscusRoomInformation struct {

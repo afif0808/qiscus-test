@@ -10,7 +10,6 @@ import (
 
 type usecase interface {
 	ResolveRoom(ctx context.Context, p payloads.ResolveRoom) error
-	SetResolveRoomWebhookURL(ctx context.Context, url string) error
 }
 
 type RoomRestHandler struct {
