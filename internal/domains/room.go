@@ -1,8 +1,12 @@
 package domains
 
-type QiscusActiveRoom struct {
-	RoomID  string `json:"room_id"`
-	AgentID int64  `json:"agent_id"`
+import "time"
+
+type QiscusRoom struct {
+	ID        string    `json:"id"`
+	AgentID   int64     `json:"agent_id"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type QiscusRoomInformation struct {

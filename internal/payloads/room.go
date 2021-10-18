@@ -1,9 +1,9 @@
 package payloads
 
-type activeRoomService struct {
+type RoomService struct {
 	RoomID string `json:"room_id"`
 }
 
-type ResolveActiveRoom struct {
-	Service activeRoomService `json:"service"`
+type ResolveRoom struct {
+	Service RoomService `json:"service"`
 }

@@ -9,17 +9,17 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type ActiveRoomRedisRepository struct {
+type RoomRedisRepository struct {
 	rp *redis.Pool
 }
 
-func NewActiveRoomRedisRepository(rp *redis.Pool) ActiveRoomRedisRepository {
-	return ActiveRoomRedisRepository{rp: rp}
+func NewRoomRedisRepository(rp *redis.Pool) RoomRedisRepository {
+	return RoomRedisRepository{rp: rp}
 }
 
-func (repo *ActiveRoomRedisRepository) AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error {
+func (repo *RoomRedisRepository) AddRoom(ctx context.Context, room domains.QiscusRoom) error {
 	conn := repo.rp.Get()
-	buff, err := json.Marshal(qar)
+	buff, err := json.Marshal(room)
 	if err != nil {
 		return err
 	}
@@ -27,7 +27,7 @@ func (repo *ActiveRoomRedisRepository) AddActiveRoom(ctx context.Context, qar do
 	return err
 }
 
-func (repo *ActiveRoomRedisRepository) GetAllActiveRooms(ctx context.Context) ([]domains.QiscusActiveRoom, error) {
+func (repo *RoomRedisRepository) GetAllRooms(ctx context.Context) ([]domains.QiscusRoom, error) {
 	conn := repo.rp.Get()
 	data, err := conn.Do("LRANGE", "room:active", 0, -1)
 	if err != nil {
@@ -39,63 +39,63 @@ func (repo *ActiveRoomRedisRepository) GetAllActiveRooms(ctx context.Context) ([
 		return nil, errors.New("tpye is invalid")
 	}
 
-	var qars []domains.QiscusActiveRoom
+	var rooms []domains.QiscusRoom
 
 	for _, v := range list {
 		buff, isTypeCorrect := v.([]byte)
 		if !isTypeCorrect {
-			return nil, errors.New("tpye is invalid")
+			return nil, errors.New("type is invalid")
 		}
-		var qar domains.QiscusActiveRoom
+		var room domains.QiscusRoom
 
-		err = json.Unmarshal(buff, &qar)
+		err = json.Unmarshal(buff, &room)
 		if err != nil {
 			return nil, err
 		}
-		qars = append(qars, qar)
+		rooms = append(rooms, room)
 	}
 
-	return qars, nil
+	return rooms, nil
 }
 
-func (repo *ActiveRoomRedisRepository) GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error) {
-	allQars, err := repo.GetAllActiveRooms(ctx)
+func (repo *RoomRedisRepository) GetAgentRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error) {
+	allrooms, err := repo.GetAllRooms(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var qars []domains.QiscusActiveRoom
-	for _, v := range allQars {
+	var rooms []domains.QiscusRoom
+	for _, v := range allrooms {
 		if v.AgentID == agentID {
-			qars = append(qars, v)
+			rooms = append(rooms, v)
 		}
 	}
 
-	return qars, nil
+	return rooms, nil
 }
 
-func (repo *ActiveRoomRedisRepository) GetActiveRoom(ctx context.Context, roomID string) (domains.QiscusActiveRoom, error) {
-	var qar domains.QiscusActiveRoom
-	allQars, err := repo.GetAllActiveRooms(ctx)
+func (repo *RoomRedisRepository) GetRoom(ctx context.Context, roomID string) (domains.QiscusRoom, error) {
+	var room domains.QiscusRoom
+	allrooms, err := repo.GetAllRooms(ctx)
 	if err != nil {
-		return qar, err
+		return room, err
 	}
-	for _, v := range allQars {
-		if v.RoomID == roomID {
-			qar = v
+	for _, v := range allrooms {
+		if v.ID == roomID {
+			room = v
 			break
 		}
 	}
 
-	return qar, nil
+	return room, nil
 }
 
-func (repo *ActiveRoomRedisRepository) RemoveActiveRoom(ctx context.Context, roomID string) error {
-	allQars, err := repo.GetAllActiveRooms(ctx)
+func (repo *RoomRedisRepository) RemoveRoom(ctx context.Context, roomID string) error {
+	allrooms, err := repo.GetAllRooms(ctx)
 	if err != nil {
 		return err
 	}
-	for _, v := range allQars {
-		if v.RoomID != roomID {
+	for _, v := range allrooms {
+		if v.ID != roomID {
 			continue
 		}
 		buff, err := json.Marshal(v)
@@ -116,21 +116,26 @@ type RoomQueueRedisRepository struct {
 func NewRoomQueueRedisRepository(rp *redis.Pool) RoomQueueRedisRepository {
 	return RoomQueueRedisRepository{rp: rp}
 }
-func (repo *RoomQueueRedisRepository) EnqueueRoom(ctx context.Context, roomID string) error {
+func (repo *RoomQueueRedisRepository) EnqueueRoom(ctx context.Context, room domains.QiscusRoom) error {
+	buff, err := json.Marshal(room)
+	if err != nil {
+		return err
+	}
 	conn := repo.rp.Get()
-	_, err := conn.Do("RPUSH", "room:queue", roomID)
+	_, err = conn.Do("RPUSH", "room:queue", buff)
 	return err
 }
-func (repo *RoomQueueRedisRepository) DequeueRoom(ctx context.Context) (roomID int64, err error) {
+func (repo *RoomQueueRedisRepository) DequeueRoom(ctx context.Context) (room domains.QiscusRoom, err error) {
 	conn := repo.rp.Get()
 	data, err := conn.Do("LPOP", "room:queue")
 	if err != nil {
 		return
 	}
-	roomID, isTypeCorrect := data.(int64)
+	buff, isTypeCorrect := data.([]byte)
 	if !isTypeCorrect {
 		err = errors.New("type is not valid")
 		return
 	}
+	err = json.Unmarshal(buff, &room)
 	return
 }

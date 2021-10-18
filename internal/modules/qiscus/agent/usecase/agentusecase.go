@@ -15,9 +15,9 @@ import (
 )
 
 type repository interface {
-	AddActiveRoom(ctx context.Context, qar domains.QiscusActiveRoom) error
-	EnqueueRoom(ctx context.Context, roomID string) error
-	GetAgentActiveRooms(ctx context.Context, agentID int64) ([]domains.QiscusActiveRoom, error)
+	AddRoom(ctx context.Context, qar domains.QiscusRoom) error
+	EnqueueRoom(ctx context.Context, room domains.QiscusRoom) error
+	GetAgentRooms(ctx context.Context, agentID int64) ([]domains.QiscusRoom, error)
 }
 
 type AgentUsecase struct {
@@ -38,17 +38,23 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	// Otherwise add to room queue
 
 	if p.Candidate == nil {
-		auc.repo.EnqueueRoom(ctx, p.RoomID)
+		auc.repo.EnqueueRoom(ctx, domains.QiscusRoom{
+			ID:      p.RoomID,
+			AgentID: p.Candidate.ID,
+		})
 		return nil
 	}
 
-	rooms, err := auc.repo.GetAgentActiveRooms(ctx, p.Candidate.ID)
+	rooms, err := auc.repo.GetAgentRooms(ctx, p.Candidate.ID)
 	if err != nil {
 		return err
 	}
 
 	if len(rooms) >= 2 {
-		auc.repo.EnqueueRoom(ctx, p.RoomID)
+		auc.repo.EnqueueRoom(ctx, domains.QiscusRoom{
+			ID:      p.RoomID,
+			AgentID: p.Candidate.ID,
+		})
 		return nil
 	}
 
@@ -64,8 +70,8 @@ func (auc *AgentUsecase) AssignAgent(ctx context.Context, p payloads.QiscusAgent
 	if err != nil {
 		return err
 	}
-	return auc.repo.AddActiveRoom(ctx, domains.QiscusActiveRoom{
-		RoomID:  p.RoomID,
+	return auc.repo.AddRoom(ctx, domains.QiscusRoom{
+		ID:      p.RoomID,
 		AgentID: p.AgentID,
 	})
 }

@@ -9,16 +9,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddActiveRoom(t *testing.T) {
+func TestAddRoom(t *testing.T) {
 	pool := redis.Pool{
 		Dial: func() (conn redis.Conn, err error) {
 			return redis.Dial("tcp", ":6379")
 		},
 	}
 
-	repo := NewActiveRoomRedisRepository(&pool)
-	err := repo.AddActiveRoom(context.Background(), domains.QiscusActiveRoom{
-		RoomID:  "100",
+	repo := NewRoomRedisRepository(&pool)
+	err := repo.AddRoom(context.Background(), domains.QiscusRoom{
+		ID:      "100",
 		AgentID: 100,
 	})
 
@@ -26,16 +26,16 @@ func TestAddActiveRoom(t *testing.T) {
 
 }
 
-func TestGetActiveRooms(t *testing.T) {
+func TestGetRooms(t *testing.T) {
 	pool := redis.Pool{
 		Dial: func() (conn redis.Conn, err error) {
 			return redis.Dial("tcp", ":6379")
 		},
 	}
 
-	repo := NewActiveRoomRedisRepository(&pool)
+	repo := NewRoomRedisRepository(&pool)
 
-	qars, err := repo.GetAgentActiveRooms(context.Background(), 99)
+	qars, err := repo.GetAgentRooms(context.Background(), 99)
 	assert.NoError(t, err)
 	assert.Equal(t, true, len(qars) > 0)
 
