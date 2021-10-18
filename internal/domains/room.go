@@ -3,7 +3,7 @@ package domains
 import "time"
 
 type QiscusRoom struct {
-	ID        string    `json:"id"`
+	ID        string    `json:"id" gorm:"primaryKey;autoIncrement:false"`
 	AgentID   int64     `json:"agent_id"`
 	IsActive  bool      `json:"is_active"`
 	CreatedAt time.Time `json:"created_at"`

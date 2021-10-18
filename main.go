@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/afif0808/qiscus-test/internal/domains"
 	agemtmodule "github.com/afif0808/qiscus-test/internal/modules/qiscus/agent"
 	roommodule "github.com/afif0808/qiscus-test/internal/modules/qiscus/room"
 
@@ -19,6 +20,10 @@ func InitDB() (readDB, writeDB *gorm.DB) {
 		log.Panic(err)
 	}
 	writeDB, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")))
+	if err != nil {
+		log.Panic(err)
+	}
+	err = writeDB.AutoMigrate(&domains.QiscusRoom{})
 	if err != nil {
 		log.Panic(err)
 	}
