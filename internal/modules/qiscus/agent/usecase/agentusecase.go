@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -21,12 +22,18 @@ type repository interface {
 }
 
 type AgentUsecase struct {
-	repo repository
+	repo              repository
+	agentRoomCapacity int
 }
 
 func NewAgentUsecase(repo repository) AgentUsecase {
 	uc := AgentUsecase{
 		repo: repo,
+	}
+	var err error
+	uc.agentRoomCapacity, err = strconv.Atoi(os.Getenv("AGENT_ROOM_CAPACITY"))
+	if err != nil {
+		log.Panic(err)
 	}
 
 	return uc
@@ -49,8 +56,8 @@ func (auc *AgentUsecase) AllocateAgent(ctx context.Context, p payloads.QiscusAge
 	if err != nil {
 		return err
 	}
-
-	if len(rooms) >= 2 {
+	isAgentRoomUnlimited := auc.agentRoomCapacity == 0
+	if isAgentRoomUnlimited && len(rooms) >= 2 {
 		auc.repo.EnqueueRoom(ctx, domains.QiscusRoom{
 			ID:      p.RoomID,
 			AgentID: p.Candidate.ID,

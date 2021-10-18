@@ -33,7 +33,6 @@ func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) 
 	// Get active room by given room id
 	// Remove active room
 	// Dequeue room
-	// Check if room is still waiting & unresolved
 	// Assign agent
 	ruc.wg.Wait()
 	ruc.wg.Add(1)
