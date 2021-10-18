@@ -10,6 +10,7 @@ import (
 
 type usecase interface {
 	ResolveRoom(ctx context.Context, p payloads.ResolveRoom) error
+	SetResolveRoomWebhookURL(ctx context.Context, url string) error
 }
 
 type RoomRestHandler struct {
@@ -17,7 +18,8 @@ type RoomRestHandler struct {
 }
 
 func NewRoomRestHandler(uc usecase) RoomRestHandler {
-	return RoomRestHandler{uc: uc}
+	handler := RoomRestHandler{uc: uc}
+	return handler
 }
 
 func (rrh RoomRestHandler) Mount(root *echo.Group) {
