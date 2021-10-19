@@ -1,1 +1,1 @@
-web:bin/qiscus-test
+web: bin/qiscus-test

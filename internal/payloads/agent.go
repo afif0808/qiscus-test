@@ -5,11 +5,11 @@ type candidateAgent struct {
 }
 
 type QiscusAgentAllocation struct {
-	RoomID    int64          `json:"room_id"`
-	Candidate candidateAgent `json:"candidate_agent"`
+	RoomID    string          `json:"room_id"`
+	Candidate *candidateAgent `json:"candidate_agent"`
 }
 
 type QiscusAgentAssignment struct {
-	RoomID  int64
+	RoomID  string
 	AgentID int64
 }
