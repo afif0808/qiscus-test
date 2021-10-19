@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/afif0808/qiscus-test/internal/customerrors"
 	"github.com/afif0808/qiscus-test/internal/domains"
 	"github.com/afif0808/qiscus-test/internal/payloads"
 )
@@ -45,8 +46,10 @@ func (ruc RoomUsecase) ResolveRoom(ctx context.Context, p payloads.ResolveRoom) 
 		return err
 	}
 	room, err := ruc.repo.DequeueRoom(ctx)
-	if err != nil {
+	if err != nil && err != customerrors.CustomErrorNotFound {
 		return err
+	} else if err == customerrors.CustomErrorNotFound {
+		return nil
 	}
 
 	err = ruc.ucs.AssignAgent(ctx, payloads.QiscusAgentAssignment{
