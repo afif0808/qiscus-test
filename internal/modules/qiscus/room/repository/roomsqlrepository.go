@@ -48,10 +48,11 @@ func (repo *RoomSQLRepository) DequeueRoom(ctx context.Context) (domains.QiscusR
 		Order(clause.OrderByColumn{Column: clause.Column{Name: "created_at"}, Desc: false}).
 		Where("is_active = ?", false).
 		First(&room).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			err = customerrors.CustomErrorNotFound
+		}
 		return room, err
-	} else if err != gorm.ErrRecordNotFound {
-		return room, customerrors.CustomErrorNotFound
 	}
 	room.IsActive = true
 	err = repo.writeDB.Save(&room).Error
